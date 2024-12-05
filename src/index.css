@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.loginPlanet{
+  background-image: url('./assets/Planet.gif');
+  background-size: cover; /* Ensures the image covers the div */
+  background-position: center; /* Centers the image */
+}
+
+.login:hover{
+  box-shadow: 0 0 83.5px 10px #e5aeae7c;
+}
