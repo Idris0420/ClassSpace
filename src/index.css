@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 .loginPlanet{
   background-image: url('./assets/Planet.gif');
   background-size: cover; /* Ensures the image covers the div */
@@ -10,4 +11,10 @@
 
 .login:hover{
   box-shadow: 0 0 83.5px 10px #e5aeae7c;
+}
+
+.pageNotFound{
+  background-image: url('./assets/Night_Sky.gif');
+  background-position: center;
+  background-size: cover;
 }
