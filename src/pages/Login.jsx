@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import { addDoc, collection, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
 import Logo from '../assets/Logo.png'
-import { auth, provider } from '../FirebaseConfig'
+import { auth, db, provider } from '../FirebaseConfig'
 import { signInWithPopup } from 'firebase/auth'
 
 import Cookies from 'universal-cookie';
@@ -12,8 +12,29 @@ function Login( {setLogin} ){
         try{
             const result = await signInWithPopup(auth, provider);
             cookies.set("auth-token", result.user.refreshToken);
-            setLogin(true);
+            const currentUser = result.user;
+            const userColRef = collection(db, "users");
+            const getUsers = query(userColRef, where("uid", "==", result.user.uid));
+            const userSnapshot = await getDocs(getUsers);
 
+            if (userSnapshot.empty){
+                await addDoc(userColRef, {
+                    uid: currentUser.uid,
+                    displayName: currentUser.displayName,
+                    email: currentUser.email,
+                    photoURL: currentUser.photoURL,
+                    refreshToken: currentUser.refreshToken,
+                    createdAt: serverTimestamp()
+                })
+                
+                console.log("New user, WELCOME! <3");
+            } else {
+                console.log("User Already exist");
+            }
+
+            
+
+            setLogin(true);
         } catch(err) {
             console.log(err);
         }
