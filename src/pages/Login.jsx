@@ -1,15 +1,19 @@
+import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png'
 import { auth, provider } from '../FirebaseConfig'
 import { signInWithPopup } from 'firebase/auth'
 
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
-function Login(){
+function Login( {setLogin} ){
 
     const signInWithGoogle = async () => {
+        
         try{
-        const result = await signInWithPopup(auth, provider);
-        cookies.set("auth-token", result.user.refreshToken)
+            const result = await signInWithPopup(auth, provider);
+            cookies.set("auth-token", result.user.refreshToken);
+            setLogin(true);
+
         } catch(err) {
             console.log(err);
         }
