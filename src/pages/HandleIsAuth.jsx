@@ -8,7 +8,7 @@ function HandleIsAuth(){
     const [isLoggedIn, setLogin] = useState(cookies.get("auth-token"));
 
     return(
-        isLoggedIn ? <DashBoard/> : <Login setLogin={setLogin}/>
+        isLoggedIn ? <DashBoard setLogin={setLogin}/> : <Login setLogin={setLogin}/>
     )
 }
 
