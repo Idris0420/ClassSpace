@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Close from '../assets/Close.png'
 import { useNavigate } from 'react-router-dom'
-import { addDoc, collection, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { auth, db } from '../FirebaseConfig';
 
 function CreateClass(){
@@ -10,34 +10,69 @@ function CreateClass(){
     const [className, changeClassName] = useState("");
 
     const handleCreateClass = async () => {
-
         const generateRandomID = () => {
             return Math.random().toString(36).substring(2, 10);
         };
 
+        const userColRef = collection(db, "users");
+        const userQuery = query(userColRef, where("uid", "==", auth.currentUser.uid))
+        const userquerySnapshot = await getDocs(userQuery);
+        const userDocID = userquerySnapshot.docs[0].id;
+        const userDocRef = doc(db, "users", userDocID);
+        const userSubColRef = collection(userDocRef, "classJoined");
+
         const classCollRef = collection(db, "class");
-        let roomID = generateRandomID();
+        let classID = generateRandomID();
+
         while(true){
-            const classQuery = query(classCollRef, where("roomID", "==", roomID))
+            const classQuery = query(classCollRef, where("roomID", "==", classID));
             const hasDuplicate = await getDocs(classQuery);
             
             if(hasDuplicate.empty){
                 break;
             } else {
-                roomID = generateRandomID();
+                classID = generateRandomID();
             }
         }
+
         const classDetails = {
             className: className,
             createdAt: serverTimestamp(),
-            roomID: roomID,
+            classID: classID,
             ownerID: auth.currentUser.uid,
             ownerName: auth.currentUser.displayName
         }
+
+        const userUpdateDetails = {
+            className: className,
+            classID: classID,
+            dateJoined: serverTimestamp()
+        }
+
+        const userJoiningDetail = {
+            name: auth.currentUser.displayName,
+            photo: auth.currentUser.photoURL,
+            uid: auth.currentUser.uid,
+            dateJoined: serverTimestamp()
+        }
+
+        
+        
+
         try {
             await addDoc(classCollRef, classDetails);
-            alert("Successfully created class!")
-            navigate("/ClassSpace/")
+            await addDoc(userSubColRef, userUpdateDetails);
+            
+            const classQuery = query(classCollRef, where("classID", "==", classID));
+            const classquerySnapshot = await getDocs(classQuery);
+            console.log(classquerySnapshot);
+            const classDocID = classquerySnapshot.docs[0].id;
+            const classDocRef = doc(db, "class", classDocID);
+            const classSubColRef = collection(classDocRef, "classMembers");
+
+            await addDoc(classSubColRef, userJoiningDetail)
+            alert("Successfully created class!");
+            navigate("/ClassSpace/");
         } catch (err) {
             console.log(err);
         }

@@ -5,18 +5,64 @@ import Attach from '../assets/Attach.png'
 import Send from '../assets/Send.png'
 import Close from '../assets/Close.png'
 import SignOut from '../assets/SignOut.png'
+import GroupProfile from '../assets/GroupProfile.png'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
 import Cookies from 'universal-cookie'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { auth, db } from '../FirebaseConfig'
+
+import { useAuthState } from "react-firebase-hooks/auth" 
 
 function DashBoard({setLogin}) {
     const navigate = useNavigate();
     const cookies = new Cookies();
 
     const [isMenuOpen, setMenuState] = useState(false);
+    const [classes, setClasses] = useState([]);
+    const [user, loading] = useAuthState(auth);
+
+    useEffect(() => {
+        const getUserClasses = async () => {
+            if (loading) {
+            console.log("Loading authentication state...");
+            return; // Wait until loading completes
+            }
+
+            if (!user) {
+                console.log("User is not authenticated");
+                return; // Exit if user is not authenticated
+            }
+
+            try {
+                const userColRef = collection(db, "users");
+                const userQuery = query(userColRef, where("uid", "==", user.uid)); // Use `user.uid` instead of `auth.currentUser.uid`
+
+                console.log("Current User UID:", user.uid);
+
+                const userquerySnapshot = await getDocs(userQuery);
+                if (userquerySnapshot.empty) {
+                    console.log("No user document found");
+                    return;
+                }
+
+                const userDocID = userquerySnapshot.docs[0].id;
+                const userSubColRef = collection(db, "users", userDocID, "classJoined");
+
+                const userClasses = await getDocs(userSubColRef);
+                setClasses(userClasses.docs);
+                
+            } catch (error) {
+            console.error("Error fetching user classes:", error);
+            }
+        };
+        getUserClasses();
+    }, [loading, user]); // React to changes in `loading` and `user`
+
+
 
     const handeChange = () => {
         setMenuState(!isMenuOpen)
@@ -53,7 +99,28 @@ function DashBoard({setLogin}) {
                     </div>
                     <div className=" w-[100%] h-[100%] overflow-y-auto">
                         <div className="">
-                            
+                            {classes.map(doc => {
+                                const data = doc.data();
+                                return(
+                                    <div className='borderflex items-center justif-center h-[70px]' key={data.classID}>
+                                        <input 
+                                        id={`class-${data.classID}`} 
+                                        name='currentClass' 
+                                        type="radio" 
+                                        className="opacity-0 absolute peer" 
+                                        />
+                                        <label 
+                                        htmlFor={`class-${data.classID}`} 
+                                        className='flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black'
+                                        >
+                                            <img className='h-[80%]' src={GroupProfile} alt="" />
+                                            <h1 className='text-4xl text-white'>{data.className}</h1>
+                                        </label>
+</div>
+
+
+                                 )
+                            })}
                         </div>
                     </div>
                 </div>
