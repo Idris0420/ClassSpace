@@ -5,7 +5,7 @@ function App() {
   
   const router = createBrowserRouter([
     {
-      path: "/",
+      path: "/ClassSpace/",
       element: <HandleIsAuth/>,
       errorElement: <PageNotFound />,
     },

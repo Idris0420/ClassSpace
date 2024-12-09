@@ -37,8 +37,8 @@ function DashBoard({setLogin}) {
                     }`}>
                         <img src={Close} alt="" className="cursor-pointer" onClick={() => handeChange()}/>
                         <div className='mt-[15%] text-4xl font-inria text-white w-[100%] px-[20px]'>
-                            <div className='hover:bg-black py-4 border-t-[3px]'>Create Class</div>
-                            <div className='hover:bg-black py-4 border-t-[3px] border-b-[3px]'>Join Class</div>
+                            <div className='hover:bg-black py-4 border-t-[3px] cursor-pointer'>Create Class</div>
+                            <div className='hover:bg-black py-4 border-t-[3px] border-b-[3px] cursor-pointer'>Join Class</div>
                         </div>
                             <img className='mt-auto mr-4 mb-8 cursor-pointer' onClick={() => handleSignOut()} src={SignOut} alt="" />
                     </div>
