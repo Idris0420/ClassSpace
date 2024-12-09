@@ -111,7 +111,7 @@ function DashBoard({setLogin}) {
                                         />
                                         <label 
                                         htmlFor={`class-${data.classID}`} 
-                                        className='flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black'
+                                        className='gap-2 px-4 flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black'
                                         >
                                             <img className='h-[80%]' src={GroupProfile} alt="" />
                                             <h1 className='text-4xl text-white'>{data.className}</h1>
