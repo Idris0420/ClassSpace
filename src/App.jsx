@@ -1,6 +1,8 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import PageNotFound from "./pages/PageNotFound";
 import HandleIsAuth from "./pages/HandleIsAuth";
+import CreateClass from './pages/CreateClass';
+
 function App() {
   
   const router = createBrowserRouter([
@@ -10,7 +12,8 @@ function App() {
       errorElement: <PageNotFound />,
     },
     {
-      basename: "/ClassSpace", // Add the base path here
+      path: "/ClassSpace/CreateClass",
+      element: <CreateClass/>,
     }
   ]);
 

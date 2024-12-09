@@ -30,3 +30,9 @@
   background-position: center;
   background-size: cover;
 }
+
+.planets-bg{
+  background-image: url("./assets/PurpleNight.gif");
+  background-position: center;
+  background-size: cover;
+}
