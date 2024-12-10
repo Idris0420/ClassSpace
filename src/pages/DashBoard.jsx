@@ -24,6 +24,7 @@ function DashBoard({setLogin}) {
     const [isMenuOpen, setMenuState] = useState(false);
     const [classes, setClasses] = useState([]);
     const [user, loading] = useAuthState(auth);
+    const [activeChat, setActiveChat] = useState("");
 
     useEffect(() => {
         const getUserClasses = async () => {
@@ -61,9 +62,6 @@ function DashBoard({setLogin}) {
         };
         getUserClasses();
     }, [loading, user]); // React to changes in `loading` and `user`
-
-
-
     const handeChange = () => {
         setMenuState(!isMenuOpen)
     }
@@ -89,7 +87,7 @@ function DashBoard({setLogin}) {
                         <img src={Close} alt="" className="cursor-pointer" onClick={() => handeChange()}/>
                         <div className='mt-[15%] text-4xl font-inria text-white w-[100%] px-[20px]'>
                             <div className='hover:bg-black py-4 border-t-[3px] cursor-pointer' onClick={() => navigate("/ClassSpace/CreateClass")}>Create Class</div>
-                            <div className='hover:bg-black py-4 border-t-[3px] border-b-[3px] cursor-pointer'>Join Class</div>
+                            <div className='hover:bg-black py-4 border-t-[3px] border-b-[3px] cursor-pointer' onClick={() => navigate("/ClassSpace/JoinClass")}>Join Class</div>
                         </div>
                             <img className='mt-auto mr-4 mb-8 cursor-pointer' onClick={() => handleSignOut()} src={SignOut} alt="" />
                     </div>
@@ -107,18 +105,22 @@ function DashBoard({setLogin}) {
                                         id={`class-${data.classID}`} 
                                         name='currentClass' 
                                         type="radio" 
-                                        className="opacity-0 absolute peer" 
+                                        className="opacity-0 absolute peer"
+                                        value={data.classID} 
+                                        onChange={(e) => { 
+                                            const selectedValue = e.target.value; // Capture the current value
+                                            setActiveChat(selectedValue); 
+                                            console.log("Selected Value:", selectedValue);  // Log the current value
+                                        }}
                                         />
                                         <label 
                                         htmlFor={`class-${data.classID}`} 
-                                        className='gap-2 px-4 flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black'
+                                        className='gap-2 px-4 flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black hover:bg-[#0f0f0f]'
                                         >
                                             <img className='h-[80%]' src={GroupProfile} alt="" />
                                             <h1 className='text-4xl text-white'>{data.className}</h1>
                                         </label>
-</div>
-
-
+                                    </div>
                                  )
                             })}
                         </div>

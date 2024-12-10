@@ -9,6 +9,17 @@ function CreateClass(){
 
     const [className, changeClassName] = useState("");
 
+    const getUserDocID = async (uid) => {
+        const userColRef = collection(db, "users");
+        const userQuery = query(userColRef, where("uid", "==", uid));
+        const userQuerySnapshot = await getDocs(userQuery);
+        if (userQuerySnapshot.empty) {
+            throw new Error("User not found");
+        }
+        return userQuerySnapshot.docs[0].id;
+    };
+    
+
     const handleCreateClass = async () => {
         const generateRandomID = () => {
             return Math.random().toString(36).substring(2, 10);
