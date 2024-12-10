@@ -12,11 +12,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Cookies from 'universal-cookie'
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
+import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
 import { auth, db } from '../FirebaseConfig'
 
 import { useAuthState } from "react-firebase-hooks/auth" 
-import { getClassDocID } from '../GetDoc'
+import { getChatClassDocID, getClassDocID } from '../GetDoc'
 
 function DashBoard({setLogin}) {
     const navigate = useNavigate();
@@ -26,6 +26,8 @@ function DashBoard({setLogin}) {
     const [classes, setClasses] = useState([]);
     const [user, loading] = useAuthState(auth);
     const [activeClass, setActiveClass] = useState([]);
+    const [showClassDetails, setShowClassDetails] = useState(false)
+    const [currMessage, setCurrMessage] = useState("");
 
     useEffect(() => {
         const getUserClasses = async () => {
@@ -64,6 +66,10 @@ function DashBoard({setLogin}) {
         getUserClasses();
     }, [loading, user]); // React to changes in `loading` and `user`
     
+    const handleInfoShow = () => {
+        setShowClassDetails(!showClassDetails);
+    }
+
     const handeChange = () => {
         setMenuState(!isMenuOpen);
     }
@@ -82,6 +88,34 @@ function DashBoard({setLogin}) {
         console.log(classData);
     }
 
+    const sendChat = async() => {
+
+        if(!currMessage){
+            console.log("empty chat");
+            return
+        }
+        
+        const messageDetail = {
+            message: currMessage,
+            sender: auth.currentUser.displayName,
+            createdAt: serverTimestamp(),
+            userPorfile: auth.currentUser.photoURL
+        }
+
+        const classID = activeClass.classID;
+        const classDocID = await getChatClassDocID(classID);
+        const messagesColRef = collection(db, "class", classDocID, "messages");
+        await addDoc(messagesColRef, messageDetail);
+        setCurrMessage("");
+    }
+
+    const handleEnterKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            console.log("Enter key pressed");
+            sendChat();
+            // Call your desired function here
+        }
+    };
 
     return(
         <div className='relative flex w-[100vw] items-start flex-col'>
@@ -138,20 +172,30 @@ function DashBoard({setLogin}) {
                 <div className='w-[70vw] h-[90vh] bg-[#1A1A1D]'>
                     <div className='w-[100%] h-[10vh] bg-[#3B1C32] flex items-center relative justify-end px-5'>
                         <h1 className='font-inria text-white text-4xl font-bold absolute left-1/2 transform -translate-x-1/2'>{activeClass.className}</h1>
-                        <img className='cursor-pointer h-[50%]' src={Info} alt="" />
+                        <img className='cursor-pointer h-[50%]' src={Info} alt="" onClick={() => handleInfoShow()} />
                     </div>
-                    <div className='relative overflow-y-auto w-[100%] h-[72vh] '>
-                        <div className='flex items-center justify-start flex-col absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#6A1E55] h-[90%] w-[70%]'>
-                            <h1 className=''>Class Info</h1>
+                    <div className='relative w-[100%] h-[72vh] '>
+                        <div className={`rounded-[20px] pt-4 flex items-center justify-start flex-col absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#3B1C32] h-[90%] w-[70%] pb-[50px] ${showClassDetails ? "block" : "hidden"}`}>
+                            <div className='w-[90%] flex flex-row h-[10%] items-center justify-between'>
+                                <h1 className='text-white font-inria text-4xl font-bold'>Class Info</h1>
+                                <img onClick={() => handleInfoShow()} className='h-[100%] cursor-pointer' src={Close} alt="" />
+                            </div>
+                                <div className='overflow-y-auto text-white font-inria text-3xl w-[80%] border px-2 mt-[10%] gap-[10px] flex flex-col '>
+                                        <div className='py-5 flex flex-col gap-5 '>
+                                            <h1>Class ID: {activeClass.classID}</h1>
+                                            <h1>Created at: {activeClass.createdAt?.toDate().toLocaleString()}</h1>
+                                            <h1>Owner Name: {activeClass.ownerName}</h1> 
+                                        </div>
+                                </div>
                         </div>
                         <div>
                             
                         </div>
                     </div>
                     <div className='bg-[#3B222E] w-[100%] h-[8vh] flex justify-between px-10 items-center'>
-                        <img className='h-[70%]' src={Attach} alt="" />
-                        <input className='w-[85%] h-[70%] rounded-full bg-[#1A1A1D] text-white px-6 font-inria text-2xl focus:outline-none' type="text" />
-                        <img className='h-[70%]' src={Send} alt="" />
+                        <img onClick={() => alert("Di pa yan nagana")} className='cursor-pointer h-[70%]' src={Attach} alt="" />
+                        <input className='w-[85%] h-[70%] rounded-full bg-[#1A1A1D] text-white px-6 font-inria text-2xl focus:outline-none' value={currMessage} type="text" onKeyDown={handleEnterKeyPress} onChange={e => setCurrMessage(e.target.value)}/>
+                        <img onClick={() => sendChat()} className='h-[70%] cursor-pointer' src={Send} alt="" />
                     </div>
                 </div>
             </div>

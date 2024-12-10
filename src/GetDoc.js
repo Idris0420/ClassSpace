@@ -29,3 +29,15 @@ export const getClassDocID = async (classID) => {
     
     
 };
+
+export const getChatClassDocID = async (classID) => {
+    const querySnapshot = await getDocs(
+        query(collection(db, "class"), where("classID", "==", classID))
+    );
+
+    if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].id; // Assuming one match
+    }
+    throw new Error("Class not found");
+};
+
