@@ -36,11 +36,12 @@ function JoinClass(){
             photo: auth.currentUser.photoURL,
             uid: auth.currentUser.uid,
             dateJoined: serverTimestamp(),
+            email: auth.currentUser.email
         }
 
         const userUpdateDetails = {
             className: classData.className,
-            classID: classID,
+            classID: classData.classID,
             dateJoined: serverTimestamp()
         }
 
@@ -55,6 +56,9 @@ function JoinClass(){
         }
         
     }
+
+
+
     return(
         <div className="text-white font-inria planets-bg w-screen h-screen flex items-center justify-center"> 
             <div className="py-[50px] min-h-[450px] aspect-square  h-[60%] bg-[#1A1A1D] rounded-[20px]">

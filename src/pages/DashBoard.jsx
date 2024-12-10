@@ -12,10 +12,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Cookies from 'universal-cookie'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import { auth, db } from '../FirebaseConfig'
 
 import { useAuthState } from "react-firebase-hooks/auth" 
+import { getClassDocID } from '../GetDoc'
 
 function DashBoard({setLogin}) {
     const navigate = useNavigate();
@@ -24,7 +25,7 @@ function DashBoard({setLogin}) {
     const [isMenuOpen, setMenuState] = useState(false);
     const [classes, setClasses] = useState([]);
     const [user, loading] = useAuthState(auth);
-    const [activeChat, setActiveChat] = useState("");
+    const [activeClass, setActiveClass] = useState([]);
 
     useEffect(() => {
         const getUserClasses = async () => {
@@ -62,8 +63,9 @@ function DashBoard({setLogin}) {
         };
         getUserClasses();
     }, [loading, user]); // React to changes in `loading` and `user`
+    
     const handeChange = () => {
-        setMenuState(!isMenuOpen)
+        setMenuState(!isMenuOpen);
     }
 
     const handleSignOut = () => {
@@ -71,8 +73,19 @@ function DashBoard({setLogin}) {
         cookies.remove("auth-token");
     }
 
+    const handleSetActiveChat = async (e) => {
+        const classDocID = await getClassDocID(e.target.value);
+        const classDoc = doc(db, "class", classDocID);
+        const fetchClassSnapshot = getDoc(classDoc);
+        const classData = (await fetchClassSnapshot).data();
+        setActiveClass(classData);
+        console.log(classData);
+    }
+
+
     return(
-        <div className='flex w-[100vw] items-start flex-col'>
+        <div className='relative flex w-[100vw] items-start flex-col'>
+            
             <div className='flex items-center justify-center bg-[#FFABD4] h-[10vh] w-[100%]'>
                 <div className='h-[100%] flex items-center justify-center gap-3 font-inria font-bold text-4xl'>
                     <img src={LogoOnly} className='h-[70%]' alt="" />
@@ -107,12 +120,7 @@ function DashBoard({setLogin}) {
                                         type="radio" 
                                         className="opacity-0 absolute peer"
                                         value={data.classID} 
-                                        onChange={(e) => { 
-                                            const selectedValue = e.target.value; // Capture the current value
-                                            setActiveChat(selectedValue); 
-                                            console.log("Selected Value:", selectedValue);  // Log the current value
-                                        }}
-                                        />
+                                        onChange={(e) => handleSetActiveChat(e)}/>
                                         <label 
                                         htmlFor={`class-${data.classID}`} 
                                         className='gap-2 px-4 flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black hover:bg-[#0f0f0f]'
@@ -129,10 +137,13 @@ function DashBoard({setLogin}) {
 
                 <div className='w-[70vw] h-[90vh] bg-[#1A1A1D]'>
                     <div className='w-[100%] h-[10vh] bg-[#3B1C32] flex items-center relative justify-end px-5'>
-                        <h1 className='font-inria text-white text-4xl font-bold absolute left-1/2 transform -translate-x-1/2'>Science</h1>
+                        <h1 className='font-inria text-white text-4xl font-bold absolute left-1/2 transform -translate-x-1/2'>{activeClass.className}</h1>
                         <img className='cursor-pointer h-[50%]' src={Info} alt="" />
                     </div>
-                    <div className='overflow-y-auto w-[100%] h-[72vh] '>
+                    <div className='relative overflow-y-auto w-[100%] h-[72vh] '>
+                        <div className='flex items-center justify-start flex-col absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#6A1E55] h-[90%] w-[70%]'>
+                            <h1 className=''>Class Info</h1>
+                        </div>
                         <div>
                             
                         </div>

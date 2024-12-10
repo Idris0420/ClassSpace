@@ -51,20 +51,22 @@ function CreateClass(){
             createdAt: serverTimestamp(),
             classID: classID,
             ownerID: auth.currentUser.uid,
-            ownerName: auth.currentUser.displayName
+            ownerName: auth.currentUser.displayName,
         }
 
         const userUpdateDetails = {
             className: className,
             classID: classID,
-            dateJoined: serverTimestamp()
+            dateJoined: serverTimestamp(),
+            email: auth.currentUser.email
         }
 
         const userJoiningDetail = {
             name: auth.currentUser.displayName,
             photo: auth.currentUser.photoURL,
             uid: auth.currentUser.uid,
-            dateJoined: serverTimestamp()
+            dateJoined: serverTimestamp(),
+            email: auth.currentUser.email
         }
 
         
