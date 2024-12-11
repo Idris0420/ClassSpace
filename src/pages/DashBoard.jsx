@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Cookies from 'universal-cookie'
-import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore'
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore'
 import { auth, db } from '../FirebaseConfig'
 
 import { useAuthState } from "react-firebase-hooks/auth" 
@@ -28,6 +28,7 @@ function DashBoard({setLogin}) {
     const [activeClass, setActiveClass] = useState([]);
     const [showClassDetails, setShowClassDetails] = useState(false)
     const [currMessage, setCurrMessage] = useState("");
+    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
         const getUserClasses = async () => {
@@ -65,7 +66,9 @@ function DashBoard({setLogin}) {
         };
         getUserClasses();
     }, [loading, user]); // React to changes in `loading` and `user`
+
     
+
     const handleInfoShow = () => {
         setShowClassDetails(!showClassDetails);
     }
@@ -80,13 +83,30 @@ function DashBoard({setLogin}) {
     }
 
     const handleSetActiveChat = async (e) => {
+        if (activeClass.classID === e.target.value) return;
         const classDocID = await getClassDocID(e.target.value);
         const classDoc = doc(db, "class", classDocID);
-        const fetchClassSnapshot = getDoc(classDoc);
-        const classData = (await fetchClassSnapshot).data();
+        const fetchClassSnapshot = await getDoc(classDoc);
+        const classData = fetchClassSnapshot.data();
         setActiveClass(classData);
-        console.log(classData);
+
+        const messagesColRef = query(
+            collection(db, "class", classDocID, "messages"),
+            orderBy("createdAt", "asc") // Sort in ascending order
+        );
+
+        const unsubscribe = onSnapshot(messagesColRef, (snapshot) => {
+            const messagesData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+            setMessages(messagesData);
+        });
+
+        return () => unsubscribe();
     }
+
+    
 
     const sendChat = async() => {
 
@@ -98,6 +118,7 @@ function DashBoard({setLogin}) {
         const messageDetail = {
             message: currMessage,
             sender: auth.currentUser.displayName,
+            senderuid: auth.currentUser.uid,
             createdAt: serverTimestamp(),
             userPorfile: auth.currentUser.photoURL
         }
@@ -147,14 +168,14 @@ function DashBoard({setLogin}) {
                             {classes.map(doc => {
                                 const data = doc.data();
                                 return(
-                                    <div className='borderflex items-center justif-center h-[70px]' key={data.classID}>
+                                    <div className='flex items-center justif-center h-[70px]' key={data.classID} >
                                         <input 
                                         id={`class-${data.classID}`} 
                                         name='currentClass' 
                                         type="radio" 
                                         className="opacity-0 absolute peer"
                                         value={data.classID} 
-                                        onChange={(e) => handleSetActiveChat(e)}/>
+                                        onClick={(e) => handleSetActiveChat(e)}/>
                                         <label 
                                         htmlFor={`class-${data.classID}`} 
                                         className='gap-2 px-4 flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black hover:bg-[#0f0f0f]'
@@ -174,7 +195,7 @@ function DashBoard({setLogin}) {
                         <h1 className='font-inria text-white text-4xl font-bold absolute left-1/2 transform -translate-x-1/2'>{activeClass.className}</h1>
                         <img className='cursor-pointer h-[50%]' src={Info} alt="" onClick={() => handleInfoShow()} />
                     </div>
-                    <div className='relative w-[100%] h-[72vh] '>
+                    <div className='relative w-[100%] h-[72vh] overflow-y-auto'>
                         <div className={`rounded-[20px] pt-4 flex items-center justify-start flex-col absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#3B1C32] h-[90%] w-[70%] pb-[50px] ${showClassDetails ? "block" : "hidden"}`}>
                             <div className='w-[90%] flex flex-row h-[10%] items-center justify-between'>
                                 <h1 className='text-white font-inria text-4xl font-bold'>Class Info</h1>
@@ -188,8 +209,25 @@ function DashBoard({setLogin}) {
                                         </div>
                                 </div>
                         </div>
-                        <div>
-                            
+                        <div className='w-[100%] py-5 px-3'>
+                        <ul className=''>
+                            {messages.map((message) => (
+                                <li key={message.id} className=' text-black   flex mb-[20px] '>
+                                    { 
+                                    <div className='font-inria flex flex-row justify-center items-start h-auto  gap-2'>
+                                        <img src={message.userPorfile} alt="" className='h-[50px] rounded-full'/>
+                                        <div className='flex flex-col'>
+                                            <h1 className='text-white'>{message.sender}</h1> 
+                                            <h1 
+                                            className="w-fit bg-white rounded-md px-4 py-2 items-center max-w-[30vw] break-words text-ellipsis">
+                                            {message.message}
+                                            </h1>
+                                        </div>
+                                    </div>
+                                    }
+                                </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                     <div className='bg-[#3B222E] w-[100%] h-[8vh] flex justify-between px-10 items-center'>
