@@ -210,13 +210,13 @@ function DashBoard({setLogin}) {
                                 </div>
                         </div>
                         <div className='w-[100%] py-5 px-3'>
-                        <ul className=''>
+                        <ul className='w-[100%] flex flex-col'>
                             {messages.map((message) => (
-                                <li key={message.id} className=' text-black   flex mb-[20px] '>
+                                <li key={message.id} className={`text-black flex mb-[20px] ${auth.currentUser.uid == message.senderuid ? "ml-auto" : "mr-auto"}`}>
                                     { 
-                                    <div className='font-inria flex flex-row justify-center items-start h-auto  gap-2'>
+                                    <div className={`font-inria flex flex-row justify-center items-start h-auto gap-2 ${auth.currentUser.uid == message.senderuid ? "flex-row-reverse " : ""}`}>
                                         <img src={message.userPorfile} alt="" className='h-[50px] rounded-full'/>
-                                        <div className='flex flex-col'>
+                                        <div className={`flex flex-col ${auth.currentUser.uid == message.senderuid ? "items-end" : ""}`}>
                                             <h1 className='text-white'>{message.sender}</h1> 
                                             <h1 
                                             className="w-fit bg-white rounded-md px-4 py-2 items-center max-w-[30vw] break-words text-ellipsis">
