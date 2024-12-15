@@ -181,7 +181,7 @@ function DashBoard({setLogin}) {
                                         className='gap-2 px-4 flex items-center justify-start h-[100%] w-[100%] flex peer-checked:bg-black hover:bg-[#0f0f0f]'
                                         >
                                             <img className='h-[80%]' src={GroupProfile} alt="" />
-                                            <h1 className='text-4xl text-white'>{data.className}</h1>
+                                            <h1 className='text-4xl text-white overflow-hidden '>{data.className}</h1>
                                         </label>
                                     </div>
                                  )
@@ -231,7 +231,7 @@ function DashBoard({setLogin}) {
                         </div>
                     </div>
                     <div className='bg-[#3B222E] w-[100%] h-[8vh] flex justify-between px-10 items-center'>
-                        <img onClick={() => alert("Di pa yan nagana")} className='cursor-pointer h-[70%]' src={Attach} alt="" />
+                        <img className='cursor-pointer h-[70%]' src={Attach} alt="" />
                         <input className='w-[85%] h-[70%] rounded-full bg-[#1A1A1D] text-white px-6 font-inria text-2xl focus:outline-none' value={currMessage} type="text" onKeyDown={handleEnterKeyPress} onChange={e => setCurrMessage(e.target.value)}/>
                         <img onClick={() => sendChat()} className='h-[70%] cursor-pointer' src={Send} alt="" />
                     </div>
